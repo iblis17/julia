@@ -38,7 +38,13 @@ function getindex(A::LQ, d::Symbol)
     end
 end
 
-getindex(A::LQPackedQ, i::Integer, j::Integer) = (x = zeros(eltype(A), size(A, 1)); x[i] = 1; y = zeros(eltype(A), size(A, 2)); y[j] = 1; dot(x, A*y))
+function getindex(A::LQPackedQ, i::Integer, j::Integer)
+    x = zeros(eltype(A), size(A, 1))
+    x[i] = 1
+    y = zeros(eltype(A), size(A, 2))
+    y[j] = 1
+    return dot(x, A*y)
+end
 
 getq(A::LQ) = LQPackedQ(A.factors, A.tau)
 
