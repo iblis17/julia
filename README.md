@@ -1,5 +1,5 @@
 <a name="logo"/>
-<div align="center">
+<div align="center"> 
 <a href="http://julialang.org/" target="_blank">
 <img src="http://julialang.org/images/logo_hires.png" alt="Julia Logo" width="210" height="142"></img>
 </a>
