@@ -1,5 +1,5 @@
 <a name="logo"/>
-<div align="center">
+<div align="center"> 
 <a href="http://julialang.org/" target="_blank">
 <img src="http://julialang.org/images/logo_hires.png" alt="Julia Logo" width="210" height="142"></img>
 </a>
@@ -10,7 +10,7 @@ Linux, OSX: [![Build Status](https://api.travis-ci.org/JuliaLang/julia.svg?branc
 Windows: [![Build status](https://ci.appveyor.com/api/projects/status/dvial98s5vi6ealt/branch/master?svg=true)](https://ci.appveyor.com/project/JuliaLang/julia/branch/master)
 
 Code Coverage: [![Coverage Status](https://coveralls.io/repos/JuliaLang/julia/badge.svg?branch=master)](https://coveralls.io/r/JuliaLang/julia?branch=master) [![codecov.io](http://codecov.io/github/JuliaLang/julia/coverage.svg?branch=master)](http://codecov.io/github/JuliaLang/julia?branch=master)
-
+ 
 <a name="The-Julia-Language"/>
 ## The Julia Language
 
