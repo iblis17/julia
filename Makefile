@@ -328,7 +328,7 @@ define stringreplace
 	$(build_depsbindir)/stringreplace $$(strings -t x - $1 | grep '$2' | awk '{print $$1;}') '$3' 255 "$(call cygpath_w,$1)"
 endef
 
-install: $(build_depsbindir)/stringreplace $(BUILDROOT)/doc/_build/html
+install: $(build_depsbindir)/stringreplace
 	@$(MAKE) $(QUIET_MAKE) all
 	@for subdir in $(bindir) $(libexecdir) $(datarootdir)/julia/site/$(VERSDIR) $(docdir) $(man1dir) $(includedir)/julia $(libdir) $(private_libdir) $(sysconfdir); do \
 		mkdir -p $(DESTDIR)$$subdir; \
@@ -389,10 +389,6 @@ endif
 	$(INSTALL_M) $(JULIAHOME)/contrib/julia-config.jl $(DESTDIR)$(datarootdir)/julia/
 	# Copy in all .jl sources as well
 	cp -R -L $(build_datarootdir)/julia $(DESTDIR)$(datarootdir)/
-	# Copy documentation
-	cp -R -L $(build_docdir)/* $(DESTDIR)$(docdir)/
-	cp -R -L $(BUILDROOT)/doc/_build/html $(DESTDIR)$(docdir)/
-	-rm $(DESTDIR)$(docdir)/html/.buildinfo
 	# Remove perf suite
 	-rm -rf $(DESTDIR)$(datarootdir)/julia/test/perf/
 	# Remove various files which should not be installed
@@ -400,6 +396,34 @@ endif
 	-rm -f $(DESTDIR)$(datarootdir)/julia/test/Makefile
 	# Copy in beautiful new man page
 	$(INSTALL_F) $(build_man1dir)/julia.1 $(DESTDIR)$(man1dir)/
+
+	# Update RPATH entries and JL_SYSTEM_IMAGE_PATH if $(libdir_rel) != $(private_libdir_rel)
+ifneq ($(libdir_rel),$(private_libdir_rel))
+ifeq ($(OS), Darwin)
+	for julia in $(DESTDIR)$(bindir)/julia* ; do \
+		install_name_tool -rpath @executable_path/$(build_private_libdir_rel) @executable_path/$(private_libdir_rel) $$julia; \
+		install_name_tool -add_rpath @executable_path/$(build_libdir_rel) @executable_path/$(libdir_rel) $$julia; \
+	done
+else
+	for julia in $(DESTDIR)$(bindir)/julia* ; do \
+		patchelf --set-rpath '$$ORIGIN/$(private_libdir_rel):$$ORIGIN/$(libdir_rel)' $$julia; \
+	done
+endif
+endif
+
+	mkdir -p $(DESTDIR)$(sysconfdir)
+	cp -R $(build_sysconfdir)/julia $(DESTDIR)$(sysconfdir)/
+
+install-docs:
+	cp -R -L $(build_docdir)/* $(DESTDIR)$(docdir)/
+	cp -R -L $(BUILDROOT)/doc/_build/html $(DESTDIR)$(docdir)/
+	rm $(DESTDIR)$(docdir)/html/.buildinfo
+
+install-examples:
+	mkdir -p $(DESTDIR)$(datarootdir)/examples/julia/
+	cp -R -L $(JULIAHOME)/examples/* $(DESTDIR)$(datarootdir)/examples/julia/
+
+install-desktop:
 	# Copy icon and .desktop file
 	mkdir -p $(DESTDIR)$(datarootdir)/icons/hicolor/scalable/apps/
 	$(INSTALL_F) $(JULIAHOME)/contrib/julia.svg $(DESTDIR)$(datarootdir)/icons/hicolor/scalable/apps/
@@ -410,27 +434,6 @@ endif
 	# Install appdata file
 	mkdir -p $(DESTDIR)$(datarootdir)/appdata/
 	$(INSTALL_F) $(JULIAHOME)/contrib/julia.appdata.xml $(DESTDIR)$(datarootdir)/appdata/
-
-	# Update RPATH entries and JL_SYSTEM_IMAGE_PATH if $(private_libdir_rel) != $(build_private_libdir_rel)
-ifneq ($(private_libdir_rel),$(build_private_libdir_rel))
-ifeq ($(OS), Darwin)
-	for julia in $(DESTDIR)$(bindir)/julia* ; do \
-		install_name_tool -rpath @executable_path/$(build_private_libdir_rel) @executable_path/$(private_libdir_rel) $$julia; \
-		install_name_tool -add_rpath @executable_path/$(build_libdir_rel) @executable_path/$(libdir_rel) $$julia; \
-	done
-else ifeq ($(OS), Linux)
-	for julia in $(DESTDIR)$(bindir)/julia* ; do \
-		patchelf --set-rpath '$$ORIGIN/$(private_libdir_rel):$$ORIGIN/$(libdir_rel)' $$julia; \
-	done
-endif
-
-	# Overwrite JL_SYSTEM_IMAGE_PATH in julia library
-	$(call stringreplace,$(DESTDIR)$(libdir)/libjulia.$(SHLIB_EXT),sys.$(SHLIB_EXT)$$,$(private_libdir_rel)/sys.$(SHLIB_EXT))
-	$(call stringreplace,$(DESTDIR)$(libdir)/libjulia-debug.$(SHLIB_EXT),sys-debug.$(SHLIB_EXT)$$,$(private_libdir_rel)/sys-debug.$(SHLIB_EXT))
-endif
-
-	mkdir -p $(DESTDIR)$(sysconfdir)
-	cp -R $(build_sysconfdir)/julia $(DESTDIR)$(sysconfdir)/
 
 distclean dist-clean:
 	-rm -fr $(BUILDROOT)/julia-*.tar.gz $(BUILDROOT)/julia*.exe $(BUILDROOT)/julia-*.7z $(BUILDROOT)/julia-$(JULIA_COMMIT)
