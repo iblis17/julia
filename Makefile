@@ -63,11 +63,6 @@ CLEAN_TARGETS += clean-docdir
 clean-docdir:
 	@-rm -fr $(abspath $(build_docdir))
 $(build_prefix)/.examples: $(wildcard $(JULIAHOME)/examples/*.jl) $(shell find $(JULIAHOME)/examples/clustermanager)
-	@echo Copying in usr/share/doc/julia/examples
-	@-rm -fr $(build_docdir)/examples
-	@mkdir -p $(build_docdir)/examples
-	@cp -R $(JULIAHOME)/examples/*.jl $(build_docdir)/examples/
-	@cp -R $(JULIAHOME)/examples/clustermanager $(build_docdir)/examples/
 	@echo 1 > $@
 
 julia-symlink: julia-ui-$(JULIA_BUILD_MODE)
@@ -415,7 +410,6 @@ endif
 	cp -R $(build_sysconfdir)/julia $(DESTDIR)$(sysconfdir)/
 
 install-docs:
-	cp -R -L $(build_docdir)/* $(DESTDIR)$(docdir)/
 	cp -R -L $(BUILDROOT)/doc/_build/html $(DESTDIR)$(docdir)/
 	rm $(DESTDIR)$(docdir)/html/.buildinfo
 
