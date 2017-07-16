@@ -182,6 +182,7 @@ Julia v0.6.0 Release Notes
 New language features
 ---------------------
 
+
   * New type system capabilities ([#8974], [#18457])
 
     + Type parameter constraints can refer to previous parameters, e.g.
