@@ -1062,7 +1062,11 @@ function test_13559()
     @test success(p)
     rm(fn)
 end
-test_13559()
+
+for i ∈ 1:20
+    test_13559()
+end
+
 end
 @test_throws ArgumentError mkpath("fakepath", mode = -1)
 
